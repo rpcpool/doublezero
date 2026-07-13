@@ -1,49 +1,42 @@
-# yaml-language-server: $schema=https://json.schemastore.org/dependabot-2.0.json
-# vim: set ts=2 sw=2 tw=0 fo=cnqoj
-
-# Please see the documentation for all configuration options:
-# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
-
-version: 2
-updates:
-  - package-ecosystem: "gomod"
-    directories:
-      - "**/*"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
-    groups:
-      go-minor-patch:
-        update-types:
-          - "minor"
-          - "patch"
-      go-testing:
-        patterns:
-          - "github.com/stretchr/testify"
-          - "github.com/golang/mock"
-          - "go.uber.org/mock"
-
-  - package-ecosystem: "cargo"
-    directories:
-      - "**/*"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
-    groups:
-      rust-minor-patch:
-        update-types:
-          - "minor"
-          - "patch"
-      solana:
-        patterns:
-          - "solana-*"
-          - "spl-*"
-      anchor:
-        patterns:
-          - "anchor-*"
-      tokio:
-        patterns:
-          - "tokio*"
-      serde:
-        patterns:
-          - "serde*"
+"updates":
+- "directories":
+  - "**/*"
+  "groups":
+    "go-minor-patch":
+      "update-types":
+      - "minor"
+      - "patch"
+    "go-testing":
+      "patterns":
+      - "github.com/stretchr/testify"
+      - "github.com/golang/mock"
+      - "go.uber.org/mock"
+  "open-pull-requests-limit": 10
+  "package-ecosystem": "gomod"
+  "schedule":
+    "interval": "weekly"
+- "directories":
+  - "**/*"
+  "groups":
+    "anchor":
+      "patterns":
+      - "anchor-*"
+    "rust-minor-patch":
+      "update-types":
+      - "minor"
+      - "patch"
+    "serde":
+      "patterns":
+      - "serde*"
+    "solana":
+      "patterns":
+      - "solana-*"
+      - "spl-*"
+    "tokio":
+      "patterns":
+      - "tokio*"
+  "open-pull-requests-limit": 10
+  "package-ecosystem": "cargo"
+  "schedule":
+    "interval": "weekly"
+"version": 2
