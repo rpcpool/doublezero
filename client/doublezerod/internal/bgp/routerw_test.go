@@ -14,6 +14,8 @@ type MockRouteReaderWriter struct {
 	RouteDeleteFunc     func(*routing.Route) error
 	RouteByProtocolFunc func(int) ([]*routing.Route, error)
 
+	RouteByProtocolAllTablesFunc func(int) ([]*routing.Route, error)
+
 	forgotten    []*routing.Route
 	forgottenVia []net.IP
 }
@@ -45,6 +47,13 @@ func (m *MockRouteReaderWriter) RouteByProtocol(protocol int) ([]*routing.Route,
 		return nil, nil
 	}
 	return m.RouteByProtocolFunc(protocol)
+}
+
+func (m *MockRouteReaderWriter) RouteByProtocolAllTables(protocol int) ([]*routing.Route, error) {
+	if m.RouteByProtocolAllTablesFunc == nil {
+		return nil, nil
+	}
+	return m.RouteByProtocolAllTablesFunc(protocol)
 }
 
 func TestClient_RouteReaderWriterWithNoUninstall_NoUninstallTrue_SuppressesDeleteOnly(t *testing.T) {

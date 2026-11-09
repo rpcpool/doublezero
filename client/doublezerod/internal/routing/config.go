@@ -76,6 +76,12 @@ func (c *ConfiguredRouteReaderWriter) RouteByProtocol(protocol int) ([]*Route, e
 	return c.nlr.RouteByProtocol(protocol)
 }
 
+var _ AllTablesRouteLister = (*ConfiguredRouteReaderWriter)(nil)
+
+func (c *ConfiguredRouteReaderWriter) RouteByProtocolAllTables(protocol int) ([]*Route, error) {
+	return RouteByProtocolAllTables(c.nlr, protocol)
+}
+
 func (c *ConfiguredRouteReaderWriter) RouteForget(r *Route) {
 	ForgetRoute(c.nlr, r)
 }

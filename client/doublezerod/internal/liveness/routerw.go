@@ -15,6 +15,8 @@ type RouteReaderWriter interface {
 	RouteByProtocol(int) ([]*routing.Route, error)
 }
 
+var _ routing.AllTablesRouteLister = (*routeReaderWriter)(nil)
+
 // routeReaderWriter is an interface-specific adapter that connects a single
 // network interface (iface) to the liveness Manager. It is typically created
 // by the BGP plugin so that each managed interface has its own scoped view
@@ -60,12 +62,24 @@ func (m *routeReaderWriter) RouteByProtocol(protocol int) ([]*routing.Route, err
 		return m.rrw.RouteByProtocol(protocol)
 	}
 
-	// Return all routes that we are tracking, whether installed in the kernel or not.
-	// This method is used to flush routes when a BGP session is closed, so we need to  return
-	// all routes that need to be cleaned up.
+	return m.sessionRoutes(), nil
+}
+
+// RouteByProtocolAllTables is RouteByProtocol for every routing table. Tracked
+// BGP routes already span all tables, so only other protocols differ.
+func (m *routeReaderWriter) RouteByProtocolAllTables(protocol int) ([]*routing.Route, error) {
+	if protocol != unix.RTPROT_BGP {
+		return routing.RouteByProtocolAllTables(m.rrw, protocol)
+	}
+	return m.sessionRoutes(), nil
+}
+
+// sessionRoutes returns every tracked route, installed in the kernel or not,
+// so a BGP session close can clean up all of them.
+func (m *routeReaderWriter) sessionRoutes() []*routing.Route {
 	routes := []*routing.Route{}
 	for _, sess := range m.lm.GetSessions() {
 		routes = append(routes, &sess.Route.Route)
 	}
-	return routes, nil
+	return routes
 }
