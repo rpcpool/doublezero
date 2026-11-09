@@ -6,6 +6,8 @@ import (
 	"github.com/malbeclabs/doublezero/client/doublezerod/internal/routing"
 )
 
+var _ routing.AllTablesRouteLister = (*routeReaderWriterWithNoUninstall)(nil)
+
 type routeReaderWriterWithNoUninstall struct {
 	routeReaderWriter RouteReaderWriter
 	noUninstall       bool
@@ -34,6 +36,10 @@ func (r *routeReaderWriterWithNoUninstall) RouteDelete(route *routing.Route) err
 
 func (r *routeReaderWriterWithNoUninstall) RouteByProtocol(protocol int) ([]*routing.Route, error) {
 	return r.routeReaderWriter.RouteByProtocol(protocol)
+}
+
+func (r *routeReaderWriterWithNoUninstall) RouteByProtocolAllTables(protocol int) ([]*routing.Route, error) {
+	return routing.RouteByProtocolAllTables(r.routeReaderWriter, protocol)
 }
 
 func (r *routeReaderWriterWithNoUninstall) RouteForget(route *routing.Route) {

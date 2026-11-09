@@ -201,9 +201,9 @@ func (p *Plugin) OnClose(peer corebgp.PeerConfig) {
 		routing.ForgetRoutesVia(p.RouteReaderWriter, net.IP(peerGw))
 
 		protocol := unix.RTPROT_BGP // 186
-		routes, err := p.RouteReaderWriter.RouteByProtocol(protocol)
+		routes, err := p.routesToFlush(protocol)
 		if err != nil {
-			slog.Error("routes: error getting routes by protocol on peer close", "protocol", protocol, "error", err)
+			slog.Error("routes: error getting routes by protocol on peer close", "protocol", protocol, "table", p.RouteTable, "error", err)
 		}
 		for _, route := range routes {
 			if !route.NextHop.Equal(net.IP(peerGw)) {
@@ -223,6 +223,25 @@ func (p *Plugin) OnClose(peer corebgp.PeerConfig) {
 	if !p.deleted.Load() {
 		p.startSessionTimeout()
 	}
+}
+
+// routesToFlush lists the routes OnClose may delete. RouteByProtocol covers
+// the main table only, so a custom RouteTable needs the all-tables listing.
+func (p *Plugin) routesToFlush(protocol int) ([]*routing.Route, error) {
+	if p.RouteTable == 0 || p.RouteTable == unix.RT_TABLE_MAIN {
+		return p.RouteReaderWriter.RouteByProtocol(protocol)
+	}
+	all, err := routing.RouteByProtocolAllTables(p.RouteReaderWriter, protocol)
+	if err != nil {
+		return nil, err
+	}
+	routes := make([]*routing.Route, 0, len(all))
+	for _, r := range all {
+		if r.Table == p.RouteTable {
+			routes = append(routes, r)
+		}
+	}
+	return routes, nil
 }
 
 // MarkDeleted marks the plugin as intentionally deleted. This prevents
